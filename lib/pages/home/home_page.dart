@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -8,8 +10,6 @@ import '../../model/get/incom.dart';
 Size _size = const Size(0, 0);
 double _height = 0;
 double _width = 0;
-
-List<PayInfo>? _payInfoList = [];
 
 bool _isWaiting = true;
 bool _isWaitingData = false;
@@ -59,7 +59,7 @@ _getHome(BuildContext context, Function setS) async {
     return;
   }
   _isWaitingData = true;
-  _payInfoList = await getHome(context);
+  await getHome(context);
   _isWaiting = false;
   _isWaitingData = false;
   setS();
@@ -196,19 +196,19 @@ class _BodyHomeState extends State<_BodyHome> {
         width: _width,
         //height: (_height * 52) / 70,
         height: (_height * 52) / 80,
-        child: _PayCardList());
+        child: _InfoCardList());
   }
 }
 
-class _PayCardList extends StatefulWidget {
+class _InfoCardList extends StatefulWidget {
   // ignore: prefer_const_constructors_in_immutables
-  _PayCardList();
+  _InfoCardList();
 
   @override
-  State<_PayCardList> createState() => __PayCardListState();
+  State<_InfoCardList> createState() => _InfoCardListState();
 }
 
-class __PayCardListState extends State<_PayCardList> {
+class _InfoCardListState extends State<_InfoCardList> {
   @override
   Widget build(BuildContext context) {
     if (_isWaiting) {
@@ -217,7 +217,7 @@ class __PayCardListState extends State<_PayCardList> {
       );
     }
 
-    if (_payInfoList == null) {
+    if (infoList == null) {
       return const Center(
         child: Text(
           'Veriler getirilirken bir hata oluştu lütfen daha sonra tekrar deneyiniz',
@@ -226,7 +226,7 @@ class __PayCardListState extends State<_PayCardList> {
       );
     }
 
-    if (_payInfoList == null) {
+    if (infoList!.isEmpty) {
       return const Center(
         child: Text(
           'Burada görüntülenmesi için ilk paylaşımınızı yapınız :)',
@@ -236,52 +236,279 @@ class __PayCardListState extends State<_PayCardList> {
     }
 
     return ListView.builder(
-      itemCount: _payInfoList!.length,
+      itemCount: infoList!.length,
       itemBuilder: (context, index) {
-        PayInfo payInfo = _payInfoList![index];
-
-        return SizedBox(
-          width: _width,
-          height: _height / 10,
-          child: Card(
-            elevation: 20,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(_width / 20)),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                      color: _getPayColor(payInfo.type),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(_width / 20),
-                        topLeft: Radius.circular(_width / 20),
-                      )),
-                  child: SizedBox(
-                    height: _height / 20,
-                    child: Row(),
-                  ),
-                ),
-                SizedBox(
-                  height: _height / 30,
-                  child: Row(),
-                ),
-              ],
-            ),
-          ),
-        );
+        return _InfoCard(index);
       },
     );
   }
 }
 
+class _InfoCard extends StatefulWidget {
+  _InfoCard(this.index, {Key? key}) : super(key: key);
+  int index;
+
+  @override
+  State<_InfoCard> createState() => _InfoCardState();
+}
+
+class _InfoCardState extends State<_InfoCard> {
+  @override
+  Widget build(BuildContext context) {
+    PayInfo? payInfo = infoList![widget.index];
+    if (payInfo == null) {
+      _checkInfo(widget.index, setS);
+      return SizedBox(
+        width: _width,
+        height: _height / 10,
+        child: Card(
+          elevation: 20,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(_width / 20)),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: _width,
+      height: _height / 10,
+      child: Card(
+        elevation: 20,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(_width / 20)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                  color: _getPayColor(payInfo.type),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(_width / 20),
+                    topLeft: Radius.circular(_width / 20),
+                  )),
+              child: SizedBox(
+                height: _height / 23,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _FromText(payInfo),
+                    _CategoryText(payInfo),
+                    _Emoji(payInfo),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: _height / 23,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _AmountText(payInfo),
+                  _DateText(payInfo),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  setS() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+}
+
+class _FromText extends StatelessWidget {
+  _FromText(this.pay, {Key? key}) : super(key: key);
+  PayInfo pay;
+
+  @override
+  Widget build(BuildContext context) {
+    String text = "";
+
+    if (pay.type == true) {
+      text = pay.incom!.from!.name.toString();
+    } else if (pay.type == false) {
+      text = pay.outgo!.to!.name.toString();
+    }
+
+    text = text.toUpperCase();
+
+    return SizedBox(
+      height: _height / 23,
+      width: _width / 4,
+      child: Container(
+        margin: EdgeInsets.only(left: _width / 20, top: _width / 50),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryText extends StatelessWidget {
+  _CategoryText(this.pay, {Key? key}) : super(key: key);
+  PayInfo pay;
+
+  @override
+  Widget build(BuildContext context) {
+    String text = "";
+
+    if (pay.type == true) {
+      text = pay.incom!.category.toString();
+    } else if (pay.type == false) {
+      text = pay.outgo!.category.toString();
+    }
+
+    text = text.toUpperCase();
+
+    return SizedBox(
+      height: _height / 23,
+      width: _width / 4,
+      child: Container(
+        margin: EdgeInsets.only(right: _width / 20, top: _width / 80),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _Emoji extends StatelessWidget {
+  _Emoji(this.pay, {Key? key}) : super(key: key);
+  PayInfo pay;
+
+  @override
+  Widget build(BuildContext context) {
+    String text = "";
+
+    if (pay.type == true) {
+      text = pay.incom!.emoji.toString();
+    } else if (pay.type == false) {
+      text = pay.outgo!.emoji.toString();
+    }
+
+    text = text.toUpperCase();
+
+    return SizedBox(
+      height: _height / 23,
+      width: _width / 4,
+      child: Container(
+        margin: EdgeInsets.only(right: _width / 20, top: _width / 50),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.end,
+        ),
+      ),
+    );
+  }
+}
+
+class _AmountText extends StatelessWidget {
+  _AmountText(this.pay, {Key? key}) : super(key: key);
+  PayInfo pay;
+
+  @override
+  Widget build(BuildContext context) {
+    String text = "";
+
+    if (pay.type == true) {
+      text = pay.incom!.amount!.toStringAsFixed(2);
+    } else if (pay.type == false) {
+      text = pay.outgo!.amount!.toStringAsFixed(2);
+    }
+
+    text = text.toUpperCase();
+
+    text = "₺$text";
+
+    return SizedBox(
+      height: _height / 23,
+      width: _width / 3,
+      child: Container(
+        margin: EdgeInsets.only(left: _width / 20, top: _width / 50),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.start,
+        ),
+      ),
+    );
+  }
+}
+
+class _DateText extends StatelessWidget {
+  _DateText(this.pay, {Key? key}) : super(key: key);
+  PayInfo pay;
+
+  @override
+  Widget build(BuildContext context) {
+    String text = "";
+
+    if (pay.type == true) {
+      text = pay.incom!.date.toString();
+    } else if (pay.type == false) {
+      text = pay.outgo!.date.toString();
+    }
+
+    text = text.toUpperCase();
+
+    return SizedBox(
+      height: _height / 23,
+      width: _width / 3,
+      child: Container(
+        margin: EdgeInsets.only(right: _width / 20, top: _width / 50),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.end,
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _checkInfo(int ind, Function setS) async {
+  for (var i = 0; i < 10;) {
+    PayInfo? payInfo = infoList![ind];
+    if (payInfo != null) {
+      setS();
+      return;
+    }
+    await Future.delayed(const Duration(seconds: 1));
+  }
+}
+
 Color _getPayColor(bool? type) {
   if (type == true) {
-    return Colors.blue;
+    return const Color(0xFF71C9FB);
   }
 
   if (type == false) {
-    return Colors.pinkAccent;
+    return const Color(0xffE174B6);
   }
 
   return Colors.white;
@@ -357,9 +584,7 @@ class __PlusIconBottomState extends State<_PlusIconBottom> {
             FontAwesomeIcons.plus,
             color: Colors.black,
           ),
-          onPressed: () {
-            print('plus ');
-          },
+          onPressed: () {},
         ),
       ),
     );

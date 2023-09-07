@@ -19,7 +19,9 @@ import 'database.dart';
 import 'send.dart';
 import 'url.dart';
 
-Future<List<PayInfo>?> getHome(BuildContext context) async {
+List<PayInfo?>? infoList;
+
+Future<void> getHome(BuildContext context) async {
   TokenDetails token = await tokenGet();
   if (token.accessToken == null) {
     await Navigator.pushNamedAndRemoveUntil(
@@ -27,19 +29,15 @@ Future<List<PayInfo>?> getHome(BuildContext context) async {
       '/WelcomePage',
       (route) => route.settings.name == '/',
     );
-    return null;
+    return;
   }
 
-  List<PayInfo>? payInfoList = await _homeSend(token.accessToken!, 0, context);
-  if (payInfoList == null) {
-    return null;
-  }
+  await _homeSend(token.accessToken!, 0, context);
 
-  return payInfoList;
+  return;
 }
 
-Future<List<PayInfo>?> _homeSend(
-    String auth, int startDay, BuildContext context) async {
+Future<void> _homeSend(String auth, int startDay, BuildContext context) async {
   Req req = Req();
   req.reqType = "his";
   req.auth = auth;
@@ -51,7 +49,7 @@ Future<List<PayInfo>?> _homeSend(
   dynamic inJson = await sendData(json, channel);
 
   if (inJson == null) {
-    return null;
+    return;
   }
 
   Resp resp = Resp.fromJson(inJson);
@@ -59,13 +57,20 @@ Future<List<PayInfo>?> _homeSend(
     dynamic jsonobject = jsonDecode(resp.message!);
     RespUserHis his = RespUserHis.fromJson(jsonobject);
     List<PayInfo>? payInfoList = incomInfoSorting(his);
+
     if (payInfoList == null) {
-      return null;
+      return;
     }
 
-    List<PayInfo> newList = await _getAllInfo(auth, startDay, payInfoList);
+    infoList = [];
 
-    return newList;
+    for (var i = 0; i < payInfoList.length; i++) {
+      infoList!.add(null);
+    }
+
+    _getAllInfo(auth, startDay, payInfoList);
+
+    return;
   }
 
   if (resp.httpCode == 401) {
@@ -76,19 +81,16 @@ Future<List<PayInfo>?> _homeSend(
       (route) => route.settings.name == '/',
     );
 
-    return null;
+    return;
   }
 
   EasyLoading.showInfo("BİR HATA OLUŞTU LÜTFEN DAHA SONRA TEKRAR DENEYİN",
       duration: const Duration(seconds: 5));
 
-  return null;
+  return;
 }
 
-Future<List<PayInfo>> _getAllInfo(
-    String auth, int startDay, List<PayInfo> payInfoList) async {
-  List<PayInfo> newList = [];
-
+void _getAllInfo(String auth, int startDay, List<PayInfo> payInfoList) {
   int counter = 0;
   int limit = 11;
 
@@ -121,22 +123,18 @@ Future<List<PayInfo>> _getAllInfo(
     }
 
     if (e.type == true) {
-      e = await _infoSendIncom(e, auth);
+      _infoSendIncom(e, auth, i);
     } else if (e.type == false) {
-      e = await _infoSendOutgo(e, auth);
+      _infoSendOutgo(e, auth, i);
     }
-
-    newList.add(e);
 
     counter++;
 
     oldDay = e.day!;
   }
-
-  return newList;
 }
 
-Future<PayInfo> _infoSendIncom(PayInfo pay, String auth) async {
+Future<void> _infoSendIncom(PayInfo pay, String auth, int ind) async {
   IncomReq incomReq = IncomReq(incomingId: pay.id);
 
   String json = jsonEncode(incomReq.toJson());
@@ -157,20 +155,26 @@ Future<PayInfo> _infoSendIncom(PayInfo pay, String auth) async {
 
   Resp resp = Resp.fromJson(inJson);
 
+  IncomingInfo incomingInfo = IncomingInfo();
+
   if (resp.status != true) {
-    pay.type = null;
-    return pay;
+    pay.incom = incomingInfo;
+    infoList![ind] = pay;
+    return;
   }
 
   dynamic jsonobject = jsonDecode(resp.message!);
 
-  IncomingInfo incomingInfo = IncomingInfo.fromJson(jsonobject);
+  incomingInfo = IncomingInfo.fromJson(jsonobject);
+
   pay.incom = incomingInfo;
 
-  return pay;
+  infoList![ind] = pay;
+
+  return;
 }
 
-Future<PayInfo> _infoSendOutgo(PayInfo pay, String auth) async {
+Future<void> _infoSendOutgo(PayInfo pay, String auth, int ind) async {
   OutgoReq outgoReq = OutgoReq(outgoingId: pay.id);
 
   String json = jsonEncode(outgoReq.toJson());
@@ -191,15 +195,23 @@ Future<PayInfo> _infoSendOutgo(PayInfo pay, String auth) async {
 
   Resp resp = Resp.fromJson(inJson);
 
+  OutgoingInfo outgoingInfo = OutgoingInfo();
+
   if (resp.status != true) {
-    pay.type = null;
-    return pay;
+    pay.outgo = outgoingInfo;
+    infoList![ind] = pay;
+    return;
   }
 
   dynamic jsonobject = jsonDecode(resp.message!);
 
-  OutgoingInfo outgoingInfo = OutgoingInfo.fromJson(jsonobject);
+  outgoingInfo = OutgoingInfo.fromJson(jsonobject);
+
   pay.outgo = outgoingInfo;
 
-  return pay;
+  pay.outgo = outgoingInfo;
+
+  infoList![ind] = pay;
+
+  return;
 }
