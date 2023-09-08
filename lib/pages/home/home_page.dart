@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     _width = _size.width;
 
     return Scaffold(
-      backgroundColor: loginBackGroundColor,
+      backgroundColor: homeBackGroundColor,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -238,7 +238,13 @@ class _InfoCardListState extends State<_InfoCardList> {
     return ListView.builder(
       itemCount: infoList!.length,
       itemBuilder: (context, index) {
-        return _InfoCard(index);
+        return GestureDetector(
+          child: _InfoCard(index),
+          onTap: () {
+            Navigator.pushNamed(context, '/PayInfoDetailsPage',
+                arguments: infoList![index]!);
+          },
+        );
       },
     );
   }
@@ -517,14 +523,9 @@ Color _getPayColor(bool? type) {
 
 //----------------------------------bottom bar--------------------------
 
-class _BottomBarHome extends StatefulWidget {
+class _BottomBarHome extends StatelessWidget {
   const _BottomBarHome();
 
-  @override
-  State<_BottomBarHome> createState() => _BottomBarHomeState();
-}
-
-class _BottomBarHomeState extends State<_BottomBarHome> {
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -559,14 +560,9 @@ class _BottomBarHomeState extends State<_BottomBarHome> {
   }
 }
 
-class _PlusIconBottom extends StatefulWidget {
+class _PlusIconBottom extends StatelessWidget {
   const _PlusIconBottom();
 
-  @override
-  State<_PlusIconBottom> createState() => __PlusIconBottomState();
-}
-
-class __PlusIconBottomState extends State<_PlusIconBottom> {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -591,9 +587,14 @@ class __PlusIconBottomState extends State<_PlusIconBottom> {
   }
 }
 
-class _FilterButtonBottom extends StatelessWidget {
+class _FilterButtonBottom extends StatefulWidget {
   const _FilterButtonBottom();
 
+  @override
+  State<_FilterButtonBottom> createState() => _FilterButtonBottomState();
+}
+
+class _FilterButtonBottomState extends State<_FilterButtonBottom> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -620,9 +621,14 @@ class _FilterButtonBottom extends StatelessWidget {
   }
 }
 
-class _ShorterButtonBottom extends StatelessWidget {
+class _ShorterButtonBottom extends StatefulWidget {
   const _ShorterButtonBottom();
 
+  @override
+  State<_ShorterButtonBottom> createState() => _ShorterButtonBottomState();
+}
+
+class _ShorterButtonBottomState extends State<_ShorterButtonBottom> {
   @override
   Widget build(BuildContext context) {
     return Container(

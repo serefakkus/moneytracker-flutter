@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:moneytracker/pages/home/home_page.dart';
+import 'package:moneytracker/pages/home/pay_info_details_page.dart';
 import 'package:moneytracker/pages/home/welcome_page.dart';
 import 'package:moneytracker/pages/login/sign_in_page.dart';
 import 'package:moneytracker/pages/login/sign_up_page.dart';
@@ -46,6 +47,9 @@ class RouteGenerator {
 
       case '/LoginNewPassPage':
         return _rotaOlustur(const LoginNewPassPage(), settings);
+
+      case '/PayInfoDetailsPage':
+        return _rotaOlustur(const PayInfoDetailsPage(), settings);
 
       default:
         return (MaterialPageRoute(

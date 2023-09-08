@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'pages/login/fist_page.dart';
 
 Color loginBackGroundColor = Colors.white;
+Color homeBackGroundColor = Colors.white;
 
 void main() {
   runApp(const FirstPage());

@@ -252,7 +252,10 @@ class _PhoneInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: (_height / 30), left: (_width / 15)),
+      margin: EdgeInsets.only(
+        top: (_height / 30),
+        left: (_width / 15),
+      ),
       child: SizedBox(
         height: (_height / 15),
         width: (_width / 1.65),
@@ -381,7 +384,10 @@ class _SignUpButtonState extends State<_SignUpButton> {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(
-          top: (_height / 6), right: (_width / 10), left: (_width / 10)),
+        top: (_height / 6),
+        right: (_width / 10),
+        left: (_width / 10),
+      ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
             elevation: 10,
