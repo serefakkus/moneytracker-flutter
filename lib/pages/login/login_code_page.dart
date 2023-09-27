@@ -16,28 +16,16 @@ TextEditingController _codecontroller = TextEditingController();
 bool _isSendenCode = false;
 bool _isWaiting = false;
 
-class LoginCodePage extends StatelessWidget {
+SmsCode _smsCode = SmsCode();
+
+class LoginCodePage extends StatefulWidget {
   const LoginCodePage({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    _size = MediaQuery.of(context).size;
-    _height = _size.height;
-    _width = _size.width;
-
-    return const Scaffold(
-      body: _LoginCode(),
-    );
-  }
-}
-
-class _LoginCode extends StatefulWidget {
-  const _LoginCode({Key? key}) : super(key: key);
 
   @override
-  State<_LoginCode> createState() => _LoginCodeState();
+  State<LoginCodePage> createState() => _LoginCodePageState();
 }
 
-class _LoginCodeState extends State<_LoginCode> {
+class _LoginCodePageState extends State<LoginCodePage> {
   @override
   void initState() {
     _isWaiting = false;
@@ -47,13 +35,43 @@ class _LoginCodeState extends State<_LoginCode> {
 
   @override
   Widget build(BuildContext context) {
+    _size = MediaQuery.of(context).size;
+    _height = _size.height;
+    _width = _size.width;
+
     if (_isWaiting) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
     if (!_isSendenCode) {
-      return Container(
+      return Scaffold(
+        body: Container(
+          color: loginBackGroundColor,
+          child: ListView(
+            children: [
+              Column(
+                children: [
+                  const _LogoSign(),
+                  const _TelefonNumarasi(),
+                  Row(
+                    children: [
+                      const Flexible(child: _PhoneInput()),
+                      _CodeSendButton(setS)
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      body: Container(
         color: loginBackGroundColor,
         child: ListView(
           children: [
@@ -67,39 +85,23 @@ class _LoginCodeState extends State<_LoginCode> {
                     _CodeSendButton(setS)
                   ],
                 ),
+                const _Code(),
+                const _CodeInput(),
+                _SignUpButton(setS, goPassPage),
               ],
             ),
           ],
         ),
-      );
-    }
-
-    return Container(
-      color: loginBackGroundColor,
-      child: ListView(
-        children: [
-          Column(
-            children: [
-              const _LogoSign(),
-              const _TelefonNumarasi(),
-              Row(
-                children: [
-                  const Flexible(child: _PhoneInput()),
-                  _CodeSendButton(setS)
-                ],
-              ),
-              const _Code(),
-              const _CodeInput(),
-              _SignUpButton(setS),
-            ],
-          ),
-        ],
       ),
     );
   }
 
   setS() {
     setState(() {});
+  }
+
+  goPassPage() {
+    Navigator.pushNamed(context, '/LoginNewPassPage', arguments: _smsCode);
   }
 }
 
@@ -143,7 +145,7 @@ _sendCodeGiris(BuildContext context, Function setS) async {
   setS();
 }
 
-sendCodePass(BuildContext context, Function setS) async {
+sendCodePass(BuildContext context, Function setS, Function goPassPage) async {
   if (_phonecontroller.text.isNotEmpty || _codecontroller.text.isNotEmpty) {
     if (_phonecontroller.text.length != 10) {
       EasyLoading.showToast('Telefon numarası 10 hane olmalıdır!',
@@ -162,15 +164,13 @@ sendCodePass(BuildContext context, Function setS) async {
           duration: const Duration(seconds: 4));
       return;
     }
-    SmsCode smsCode =
+    _smsCode =
         SmsCode(phone: _phonecontroller.text, code: _codecontroller.text);
     _isWaiting = true;
     setS();
-    bool isOk = await askRefCodeSend(smsCode);
+    bool isOk = await askRefCodeSend(_smsCode);
     _isWaiting = false;
     if (isOk) {
-      // ignore: use_build_context_synchronously
-      Navigator.pushNamed(context, '/LoginNewPassPage', arguments: smsCode);
       return;
     }
     setS();
@@ -374,8 +374,9 @@ class _CodeSendButtonState extends State<_CodeSendButton> {
 }
 
 class _SignUpButton extends StatefulWidget {
-  const _SignUpButton(this.setS, {Key? key}) : super(key: key);
+  const _SignUpButton(this.setS, this.goPassPage, {Key? key}) : super(key: key);
   final void Function() setS;
+  final void Function() goPassPage;
 
   @override
   State<_SignUpButton> createState() => _SignUpButtonState();
@@ -400,7 +401,7 @@ class _SignUpButtonState extends State<_SignUpButton> {
         ),
         onPressed: () {
           setState(() {
-            sendCodePass(context, widget.setS);
+            sendCodePass(context, widget.setS, widget.goPassPage);
           });
         },
       ),

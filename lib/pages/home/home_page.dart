@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../helpers/home_web.dart';
@@ -230,7 +231,7 @@ class _InfoCardListState extends State<_InfoCardList> {
       return const Center(
         child: Text(
           'Burada görüntülenmesi için ilk paylaşımınızı yapınız :)',
-          style: TextStyle(color: Colors.red),
+          style: TextStyle(color: Colors.green),
         ),
       );
     }
@@ -580,7 +581,13 @@ class _PlusIconBottom extends StatelessWidget {
             FontAwesomeIcons.plus,
             color: Colors.black,
           ),
-          onPressed: () {},
+          onPressed: () {
+            if (_isWaitingData) {
+              EasyLoading.showToast("Lütfen bekleyin");
+              return;
+            }
+            Navigator.pushNamed(context, '/AddPayPage');
+          },
         ),
       ),
     );

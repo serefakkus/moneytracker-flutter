@@ -13,7 +13,7 @@ Future<String?> refToken(BuildContext context) async {
     return null;
   }
 
-  if (date.isBefore(DateTime.now())) {
+  if (date.isAfter(DateTime.now())) {
     String? newToken = await refTokenSend(token.refreshToken!);
     if (newToken == null) {
       return null;
@@ -28,5 +28,5 @@ Future<String?> refToken(BuildContext context) async {
     return newToken;
   }
 
-  return token.accessToken;
+  return null;
 }

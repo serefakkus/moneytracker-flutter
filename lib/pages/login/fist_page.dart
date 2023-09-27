@@ -39,7 +39,7 @@ class _FirstPageState extends State<FirstPage> {
 }
 
 class _Islogin extends StatefulWidget {
-  const _Islogin({Key? key}) : super(key: key);
+  const _Islogin();
 
   @override
   State<_Islogin> createState() => _IsloginState();
@@ -48,19 +48,32 @@ class _Islogin extends StatefulWidget {
 class _IsloginState extends State<_Islogin> {
   @override
   Widget build(BuildContext context) {
-    _isUserLogin(context);
+    _isUserLogin(context, goHome, goWelcome);
     return const Center(child: CircularProgressIndicator());
   }
-}
 
-void _gettoken(BuildContext context) async {
-  TokenDetails token = await tokenGet();
-  if (token.accessToken == null || token.accessToken == '') {
+  goHome() {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/HomePage',
+      (route) => route.settings.name == '/',
+    );
+  }
+
+  goWelcome() {
     Navigator.pushNamedAndRemoveUntil(
       context,
       '/WelcomePage',
       (route) => route.settings.name == '/',
     );
+  }
+}
+
+void _gettoken(
+    BuildContext context, Function goHome, Function goWelcome) async {
+  TokenDetails token = await tokenGet();
+  if (token.accessToken == null || token.accessToken == '') {
+    goWelcome();
     return;
   }
 
@@ -68,26 +81,24 @@ void _gettoken(BuildContext context) async {
   var date2 = DateTime.fromMillisecondsSinceEpoch(token.rtExpires! * 1000);
 
   if (date.isAfter(DateTime.now())) {
-    await Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/HomePage',
-      (route) => route.settings.name == '/',
-    );
+    goHome();
     return;
   }
 
   if (date2.isAfter(DateTime.now())) {
-    await refToken(context);
+    String? accessToken = await refToken(context);
+    if (accessToken == null) {
+      goWelcome();
+      return;
+    }
+
+    goHome();
     return;
   }
 
-  Navigator.pushNamedAndRemoveUntil(
-    context,
-    '/WelcomePage',
-    (route) => route.settings.name == '/',
-  );
+  goWelcome();
 }
 
-void _isUserLogin(BuildContext cnt) {
-  _gettoken(cnt);
+void _isUserLogin(BuildContext cnt, Function goHome, Function goWelcome) {
+  _gettoken(cnt, goHome, goWelcome);
 }

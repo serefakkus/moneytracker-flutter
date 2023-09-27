@@ -3,15 +3,25 @@ class RespUserHis {
   List<HistoryYears>? outgoingYears;
   List<RegularHis>? inRegular;
   List<RegularHis>? outRegular;
+  bool? isEmpty;
+  String? categoryId;
+  String? fromId;
 
   RespUserHis({
     this.incomingYears,
     this.outgoingYears,
     this.inRegular,
     this.outRegular,
+    this.isEmpty,
+    this.categoryId,
+    this.fromId,
   });
 
   RespUserHis.fromJson(Map<String, dynamic> json) {
+    isEmpty = json["IsEmpty"];
+    categoryId = json["CategoryId"];
+    fromId = json["FromID"];
+
     if (json['IncomingYears'] != null) {
       incomingYears = <HistoryYears>[];
       json['IncomingYears'].forEach((v) {

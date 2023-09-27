@@ -5,7 +5,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:moneytracker/helpers/category_web.dart';
 import 'package:moneytracker/helpers/sorting.dart';
+import 'package:moneytracker/model/get/cate.dart';
 import 'package:moneytracker/model/get/his.dart';
 import 'package:moneytracker/model/get/incom.dart';
 import 'package:moneytracker/model/get/outgo.dart';
@@ -56,9 +58,16 @@ Future<void> _homeSend(String auth, int startDay, BuildContext context) async {
   if (resp.status == true) {
     dynamic jsonobject = jsonDecode(resp.message!);
     RespUserHis his = RespUserHis.fromJson(jsonobject);
+
+    userCategory.id = his.categoryId;
+    userCategory.fromId = his.fromId;
+
     List<PayInfo>? payInfoList = incomInfoSorting(his);
 
     if (payInfoList == null) {
+      if (his.isEmpty == true) {
+        infoList = [];
+      }
       return;
     }
 
@@ -98,6 +107,9 @@ void _getAllInfo(String auth, int startDay, List<PayInfo> payInfoList) {
 
   int start = 0;
 
+  userRegularCategory.inCategory = [];
+  userRegularCategory.outCategory = [];
+
   if (startDay != 0) {
     for (var i = 0; i < payInfoList.length; i++) {
       if (payInfoList[i].day == startDay) {
@@ -123,8 +135,40 @@ void _getAllInfo(String auth, int startDay, List<PayInfo> payInfoList) {
     }
 
     if (e.type == true) {
+      bool isOk = false;
+
+      for (var i = 0; i < userRegularCategory.inCategory!.length; i++) {
+        if (userRegularCategory.inCategory![i].name == e.incom!.category) {
+          isOk = true;
+          userRegularCategory.inCategory![i].iDs!.add(e.id!);
+        }
+      }
+
+      if (!isOk) {
+        CategoryInfo categoryInfo = CategoryInfo();
+        categoryInfo.name = e.incom!.category;
+        categoryInfo.iDs = [e.id!];
+        userRegularCategory.inCategory!.add(categoryInfo);
+      }
+
       _infoSendIncom(e, auth, i);
     } else if (e.type == false) {
+      bool isOk = false;
+
+      for (var i = 0; i < userRegularCategory.outCategory!.length; i++) {
+        if (userRegularCategory.outCategory![i].name == e.outgo!.category) {
+          isOk = true;
+          userRegularCategory.outCategory![i].iDs!.add(e.id!);
+        }
+      }
+
+      if (!isOk) {
+        CategoryInfo categoryInfo = CategoryInfo();
+        categoryInfo.name = e.outgo!.category;
+        categoryInfo.iDs = [e.id!];
+        userRegularCategory.outCategory!.add(categoryInfo);
+      }
+
       _infoSendOutgo(e, auth, i);
     }
 

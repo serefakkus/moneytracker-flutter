@@ -19,7 +19,7 @@ Future<dynamic> sendData(dynamic exportJson, WebSocketChannel channel) async {
       pass = true;
     },
     onError: (e) {
-      debugPrint(e);
+      debugPrint(e.toString());
       pass = true;
     },
   );

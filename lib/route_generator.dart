@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:moneytracker/pages/home/add_pay_page.dart';
 import 'package:moneytracker/pages/home/home_page.dart';
 import 'package:moneytracker/pages/home/pay_info_details_page.dart';
 import 'package:moneytracker/pages/home/welcome_page.dart';
@@ -24,6 +25,8 @@ class RouteGenerator {
 
   static Route<dynamic>? routeGenerator(RouteSettings settings) {
     switch (settings.name) {
+      //-----------------login pages-------------------------------
+
       case '/FirstPage':
         return _rotaOlustur(const FirstPage(), settings);
 
@@ -47,6 +50,13 @@ class RouteGenerator {
 
       case '/LoginNewPassPage':
         return _rotaOlustur(const LoginNewPassPage(), settings);
+
+      //-----------------login pages end-------------------------------
+
+      //------------------home pages----------------------------
+
+      case '/AddPayPage':
+        return _rotaOlustur(const AddPayPage(), settings);
 
       case '/PayInfoDetailsPage':
         return _rotaOlustur(const PayInfoDetailsPage(), settings);

@@ -51,7 +51,7 @@ class _LoginNewPassPageState extends State<LoginNewPassPage> {
           const _PassInput(),
           const Center(child: _NewPass()),
           const _NewPassInput(),
-          _SendPassButton(smsCode, setS),
+          _SendPassButton(smsCode, setS, goHomePage),
         ],
       ),
     );
@@ -60,9 +60,18 @@ class _LoginNewPassPageState extends State<LoginNewPassPage> {
   setS() {
     setState(() {});
   }
+
+  goHomePage() {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/HomePage',
+      (route) => route.settings.name == '/',
+    );
+  }
 }
 
-_sendPass(BuildContext context, SmsCode smsCode, Function setS) async {
+_sendPass(BuildContext context, SmsCode smsCode, Function setS,
+    Function goHomePage) async {
   if (_passcontroller.text.length < 6) {
     EasyLoading.showToast("ŞİFRE EN AZ 6 HANELİ OLMALIDIR!");
     return;
@@ -79,12 +88,7 @@ _sendPass(BuildContext context, SmsCode smsCode, Function setS) async {
     bool isOk = await refPassSend(singUp);
     _isWaiting = false;
     if (isOk) {
-      // ignore: use_build_context_synchronously
-      await Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/HomePage',
-        (route) => route.settings.name == '/',
-      );
+      goHomePage();
       return;
     }
     setS();
@@ -281,9 +285,11 @@ class _NewPassInputState extends State<_NewPassInput> {
 
 // ignore: must_be_immutable
 class _SendPassButton extends StatefulWidget {
-  _SendPassButton(this.smsCode, this.setS, {Key? key}) : super(key: key);
+  _SendPassButton(this.smsCode, this.setS, this.goHomePage, {Key? key})
+      : super(key: key);
   SmsCode smsCode = SmsCode();
   Function setS;
+  Function goHomePage;
 
   @override
   State<_SendPassButton> createState() => _SendPassButtonState();
@@ -308,7 +314,7 @@ class _SendPassButtonState extends State<_SendPassButton> {
           textAlign: TextAlign.center,
         ),
         onPressed: () {
-          _sendPass(context, widget.smsCode, widget.setS);
+          _sendPass(context, widget.smsCode, widget.setS, widget.goHomePage);
         },
       ),
     );

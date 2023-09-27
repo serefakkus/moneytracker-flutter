@@ -15,6 +15,8 @@ TextEditingController _codecontroller = TextEditingController();
 bool _isSendedCode = false;
 bool _isWaiting = false;
 
+SmsCode _smsCode = SmsCode();
+
 class SignUpPage extends StatelessWidget {
   const SignUpPage({Key? key}) : super(key: key);
 
@@ -81,7 +83,7 @@ class _KayitState extends State<_Kayit> {
               ),
               const _Code(),
               const _CodeInput(),
-              _SignUpButton(setS),
+              _SignUpButton(setS, goNewPassPage),
               const _GirisButon(),
             ],
           ),
@@ -92,6 +94,10 @@ class _KayitState extends State<_Kayit> {
 
   void setS() {
     setState(() {});
+  }
+
+  void goNewPassPage() {
+    Navigator.pushNamed(context, '/NewPassPage', arguments: _smsCode);
   }
 }
 
@@ -131,7 +137,7 @@ _sendCode(Function setS) async {
   }
 }
 
-_sendSignUp(BuildContext context, Function setS) async {
+_sendSignUp(BuildContext context, Function setS, Function goNewPassPage) async {
   /*
     _codeandphone[0] = _phonecontroller.text;
     _codeandphone[1] = _codecontroller.text;
@@ -158,15 +164,15 @@ _sendSignUp(BuildContext context, Function setS) async {
           duration: const Duration(seconds: 4));
       return;
     }
-    SmsCode smsCode =
+    _smsCode =
         SmsCode(phone: _phonecontroller.text, code: _codecontroller.text);
     _isWaiting = true;
     setS();
-    bool isOk = await askCodeSend(smsCode);
+    bool isOk = await askCodeSend(_smsCode);
+
     _isWaiting = false;
     if (isOk) {
-      // ignore: use_build_context_synchronously
-      Navigator.pushNamed(context, '/NewPassPage', arguments: smsCode);
+      goNewPassPage();
       return;
     }
     setS();
@@ -357,7 +363,9 @@ class _CodeSendButtonState extends State<_CodeSendButton> {
             });
             Future.delayed(const Duration(seconds: 60), () {
               _isSendedCode = false;
-              setState(() {});
+              if (mounted) {
+                setState(() {});
+              }
             });
             return;
           }
@@ -372,8 +380,10 @@ class _CodeSendButtonState extends State<_CodeSendButton> {
 }
 
 class _SignUpButton extends StatefulWidget {
-  const _SignUpButton(this.setS, {Key? key}) : super(key: key);
+  const _SignUpButton(this.setS, this.goNewPassPage, {Key? key})
+      : super(key: key);
   final void Function() setS;
+  final void Function() goNewPassPage;
 
   @override
   State<_SignUpButton> createState() => _SignUpButtonState();
@@ -400,7 +410,7 @@ class _SignUpButtonState extends State<_SignUpButton> {
           style: TextStyle(fontSize: _width / 20),
         ),
         onPressed: () {
-          _sendSignUp(context, widget.setS);
+          _sendSignUp(context, widget.setS, widget.goNewPassPage);
         },
       ),
     );

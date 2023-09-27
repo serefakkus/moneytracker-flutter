@@ -54,7 +54,7 @@ class _NewPassPageState extends State<NewPassPage> {
           const _NewPass(),
           const _NewPassInput(),
           const _SozlesmeOnay(),
-          _SendPassButton(smsCode, setS),
+          _SendPassButton(smsCode, setS, goHomePage),
         ],
       ),
     );
@@ -62,6 +62,14 @@ class _NewPassPageState extends State<NewPassPage> {
 
   setS() {
     setState(() {});
+  }
+
+  goHomePage() {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/HomePage',
+      (route) => route.settings.name == '/',
+    );
   }
 }
 
@@ -295,9 +303,11 @@ class _SozlesmeOnayState extends State<_SozlesmeOnay> {
 
 // ignore: must_be_immutable
 class _SendPassButton extends StatefulWidget {
-  _SendPassButton(this.smsCode, this.setS, {Key? key}) : super(key: key);
+  _SendPassButton(this.smsCode, this.setS, this.goHomePage, {Key? key})
+      : super(key: key);
   SmsCode smsCode = SmsCode();
   Function setS;
+  Function goHomePage;
 
   @override
   State<_SendPassButton> createState() => _SendPassButtonState();
@@ -325,14 +335,15 @@ class _SendPassButtonState extends State<_SendPassButton> {
           style: TextStyle(fontSize: 20),
         ),
         onPressed: () {
-          _sendPass(context, widget.smsCode, widget.setS);
+          _sendPass(context, widget.smsCode, widget.setS, widget.goHomePage);
         },
       ),
     );
   }
 }
 
-_sendPass(BuildContext context, SmsCode smsCode, Function setS) async {
+_sendPass(BuildContext context, SmsCode smsCode, Function setS,
+    Function goHomePage) async {
   if (!_isOnay) {
     EasyLoading.showToast('LÜTFEN SÖZLEŞMEYİ ONAYLAYINIZ !');
     return;
@@ -354,13 +365,7 @@ _sendPass(BuildContext context, SmsCode smsCode, Function setS) async {
     bool isOk = await signUpSend(singUp);
     _isWaiting = false;
     if (isOk) {
-      // ignore: use_build_context_synchronously
-      await Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/HomePage',
-        (route) => route.settings.name == '/',
-      );
-
+      goHomePage();
       return;
     }
     setS();

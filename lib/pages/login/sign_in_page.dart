@@ -45,18 +45,27 @@ class _SignInPageState extends State<SignInPage> {
       );
     }
     return Scaffold(
-      body: _Giris(_setS),
+      body: _Giris(setS, goHomePage),
     );
   }
 
-  _setS() {
+  setS() {
     setState(() {});
+  }
+
+  goHomePage() {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/HomePage',
+      (route) => route.settings.name == '/',
+    );
   }
 }
 
 class _Giris extends StatefulWidget {
-  const _Giris(this.setS, {Key? key}) : super(key: key);
+  const _Giris(this.setS, this.goHomePage, {Key? key}) : super(key: key);
   final void Function() setS;
+  final void Function() goHomePage;
 
   @override
   State<_Giris> createState() => _GirisState();
@@ -82,7 +91,7 @@ class _GirisState extends State<_Giris> {
             const _PhoneInput(),
             const _Sifre(),
             const _SifreInput(),
-            _GirisButon(widget.setS),
+            _GirisButon(widget.setS, widget.goHomePage),
             Container(
               margin: EdgeInsets.only(top: _height / 20),
               child: const Row(
@@ -114,7 +123,7 @@ class _GirisState extends State<_Giris> {
   }
 }
 
-sendLogin(BuildContext context, Function setS) async {
+sendLogin(BuildContext context, Function setS, Function goHomePage) async {
   if (_phonecontroller.text.isEmpty) {
     EasyLoading.showInfo("TELEFON NUMARASI BOŞ OLAMAZ",
         duration: const Duration(seconds: 5));
@@ -172,11 +181,7 @@ sendLogin(BuildContext context, Function setS) async {
     _isWaiting = false;
 
     // ignore: use_build_context_synchronously
-    await Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/HomePage',
-      (route) => route.settings.name == '/',
-    );
+    goHomePage();
   }
 }
 
@@ -350,8 +355,9 @@ Color _iconColor(bool isPressed) {
 }
 
 class _GirisButon extends StatefulWidget {
-  const _GirisButon(this.setS, {Key? key}) : super(key: key);
+  const _GirisButon(this.setS, this.goHomePage, {Key? key}) : super(key: key);
   final void Function() setS;
+  final void Function() goHomePage;
 
   @override
   State<_GirisButon> createState() => _GirisButonState();
@@ -371,7 +377,7 @@ class _GirisButonState extends State<_GirisButon> {
                 borderRadius: BorderRadius.circular(50))),
         child: Text('GİRİŞ YAP', style: TextStyle(fontSize: _width / 20)),
         onPressed: () {
-          sendLogin(context, widget.setS);
+          sendLogin(context, widget.setS, widget.goHomePage);
         },
       ),
     );
